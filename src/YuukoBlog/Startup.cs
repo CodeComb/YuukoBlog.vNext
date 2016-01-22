@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Mvc;
-using Microsoft.Framework.Logging;
-using Microsoft.Framework.Configuration;
-using Microsoft.Framework.DependencyInjection;
-using Microsoft.Dnx.Runtime;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.Data.Entity;
-using Microsoft.AspNet.Hosting;
 using YuukoBlog.Models;
 
 namespace YuukoBlog
@@ -39,6 +33,10 @@ namespace YuukoBlog
             services.AddCaching();
             services.AddSession(x => x.IdleTimeout = TimeSpan.FromMinutes(20));
 
+            services.AddFileUpload()
+                .AddEntityFrameworkStorage<BlogContext>()
+                .AddSessionUploadAuthorization();
+
             services.AddMvc()
                 .AddTemplate()
                 .AddCookieTemplateProvider();
@@ -52,6 +50,7 @@ namespace YuukoBlog
 
             app.UseStaticFiles();
             app.UseSession();
+            app.UseFileUpload("/assets/shared/scripts/jquery.codecomb.fileupload.js");
 
             app.UseMvc(router =>
             {
